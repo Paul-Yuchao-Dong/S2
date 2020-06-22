@@ -1,0 +1,118 @@
+---
+title: "Viz Tasks"
+author: "Paul"
+date: '`r format(Sys.Date(), "%d\\. %m\\. %Y")`'
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+extrafont::loadfonts(device = "win")
+windowsFonts("Arial_Narrow" = windowsFont("Arial Narrow"))
+options(mc.cores = parallel::detectCores())
+library(tidyverse)
+theme_set(hrbrthemes::theme_ipsum(base_family = "Arial_Narrow"))
+```
+
+# Data
+```{r data}
+df <- rio::import("MMA_860_Grocery_Data.xlsx")
+```
+
+# 1. A scatterplot of grocery bill and the distance to store.
+
+```{r scatter}
+df %>% 
+  ggplot(aes(Distance_to_Store,Grocery_Bill))+
+  geom_jitter()+
+  geom_smooth(method = lm)+
+  labs(title = "Further you lives, more you shop groceries",
+       subtitle = "also the less likely you will come to the store",
+       x = "Distance to Store in KM",
+       y = "Grocery Bill in Dollars"
+       )
+```
+
+# 2. A boxplot of family income, broken out by the number of adults.
+
+```{r boxplot}
+
+df %>% 
+  ggplot(aes(as_factor(N_Adults), Family_Income))+
+  geom_boxplot()+
+  labs(
+    title = "More adults in the family usually means more income",
+    subtitle = "But increase from 2 to 3 adults didn't change much, adult children must be the case",
+    x = "Number of adults in the family",
+    y = "Family Income in dollars"
+  )
+
+```
+
+# 3. A histogram of family income
+
+```{r hist}
+df %>% 
+  ggplot(aes(Family_Income))+
+  geom_histogram()+
+  labs(
+    title = "Gaps in family income suggests data integrity issues",
+    y = ""
+  )+
+  scale_y_continuous(breaks = NULL)
+```
+
+# 4. A bar chart showing the total sales by family size.
+
+```{r bar}
+df %>% 
+  ggplot(aes(y = Family_Size, x = Grocery_Bill))+
+  geom_col()+
+  scale_y_continuous(breaks = 1:6)+
+  labs(
+    title = "Most sales were to smaller families"
+  )
+
+```
+
+```{r bar_alternative}
+df %>% 
+  ggplot(aes(Family_Size, weight = Grocery_Bill))+
+  geom_bar()+
+  coord_flip()
+```
+
+```{r from_class}
+ggplot(df, aes (x=Family_Size, y=Grocery_Bill)) + 
+                  geom_bar(stat="identity") +
+                  ggtitle("Total Grocery Sales by Family Size")
+```
+
+# 5. The best way you can think of to visualize family income, grocery bill, and vegetarians in one chart.
+
+```{r 3-variables}
+df %>% 
+  ggplot(aes(Family_Income, Grocery_Bill, color = as.factor(Vegetarian))) +
+  geom_point()
+  
+```
+
+```{r bar_compare}
+df %>% 
+  pivot_longer(c(Family_Income, Grocery_Bill), names_to = "key", values_to = "value") %>% 
+  group_by(key, Vegetarian) %>% 
+  summarise(value = mean(value)) %>% 
+  ggplot(aes(as_factor(Vegetarian), value))+
+  geom_col()+
+  facet_wrap(~key, scales = "free_y")
+
+```
+
