@@ -26,7 +26,7 @@ df <- rio::import("MMA_860_Grocery_Data.xlsx")
 ## Store only serves a limited region
 
 ```{r scatter}
-df %>% 
+p <- df %>% 
   ggplot(aes(Distance_to_Store,Grocery_Bill))+
   geom_jitter()+
   geom_smooth(method = lm)+
@@ -34,13 +34,18 @@ df %>%
        subtitle = "also the less likely you will come to the store",
        x = "Distance to Store in KM",
        y = "Grocery Bill in Dollars"
-       )
+       )+
+    theme(
+        rect = element_rect(fill = "transparent") # all rectangles
+      )
+ggsave(p, filename = "scatter.png",  bg = "transparent")
+knitr::include_graphics("scatter.png")
 ```
 
 ## Dataset have issues
 
 ```{r hist}
-df %>% 
+p <- df %>% 
   ggplot(aes(Family_Income))+
   geom_histogram()+
   labs(
@@ -48,17 +53,23 @@ df %>%
     y = ""
   )+
   scale_y_continuous(breaks = NULL)
+
+ggsave(p, filename = "hist.png",  bg = "transparent")
+knitr::include_graphics("hist.png")
 ```
 
 ## Serve shoppers with smaller family size
 
 ```{r bar}
-df %>% 
+p <- df %>% 
   ggplot(aes(y = Family_Size, x = Grocery_Bill))+
   geom_col()+
   scale_y_continuous(breaks = 1:6)+
   labs(
     title = "Most sales were to smaller families"
   )
+
+ggsave(p, filename = "bar.png",  bg = "transparent")
+knitr::include_graphics("bar.png")
 
 ```
